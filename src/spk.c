@@ -409,32 +409,40 @@ struct spk_s * assist_spk_init(const char *path) {
             struct sum_s* sum = &record->summary.s[b]; // get current summary
             
             // Index in our arrays for current target
-            int m = pl->num - 1;
+            int m = -1;
 
-            // New target?
-            if (pl->num==0 || sum->tar != pl->targets[m].code) {
+            // Check to see if we are adding to an existing target
+            for (int i = 0; i < pl->num; i++) {
+                if (pl->targets[i].code == sum->tar) {
+                    m = i;
+                    break;
+                }
+            }
+
+            // If this is a new target, add it to the list
+            if (m == -1) {
+                m = pl->num;
                 if (pl->num <= pl->allocated_num){
                     pl->allocated_num += 32; // increase space in batches of 32
                     pl->targets = realloc(pl->targets, pl->allocated_num*sizeof(struct spk_target));
                 }
-                m++;
+                pl->num++;
                 pl->targets[m].code = sum->tar;
                 pl->targets[m].cen = sum->cen;
                 pl->targets[m].beg = _jul(sum->beg);
                 pl->targets[m].res = _jul(sum->end) - pl->targets[m].beg;
                 pl->targets[m].one = calloc(32768, sizeof(int));
                 pl->targets[m].two = calloc(32768, sizeof(int));
-                pl->targets[m].ind = 0;
+                pl->targets[m].ind = -1;
                 // Set default of mass to 0
                 pl->targets[m].mass = 0;
-                pl->num++;
             }
 
             // add index for target
+            pl->targets[m].ind++;
             pl->targets[m].one[pl->targets[m].ind] = sum->one;
             pl->targets[m].two[pl->targets[m].ind] = sum->two;
             pl->targets[m].end = _jul(sum->end);
-            pl->targets[m].ind++;
         }
 
         // Location of next record
@@ -487,7 +495,6 @@ enum ASSIST_STATUS assist_spk_calc(struct spk_s *pl, double jde, double rel, int
         return(ASSIST_ERROR_NAST);
     }
     struct spk_target* target = &(pl->targets[m]);
-        
     if (jde + rel < target->beg || jde + rel > target->end){
         return ASSIST_ERROR_COVERAGE;
     }
@@ -635,6 +642,7 @@ enum ASSIST_STATUS assist_spk_calc_planets(struct assist_ephem* ephem, double jd
 
     struct spk_s* pl = ephem->spk_planets;
 
+
     struct spk_target* target = assist_spk_find_target(pl, code);
 
     if (target == NULL) {
@@ -661,8 +669,6 @@ enum ASSIST_STATUS assist_spk_calc_planets(struct assist_ephem* ephem, double jd
         }
 
     }
-
-    
 
     // Convert to AU and AU/day
     const double au = assist_get_constant(ephem, "AU");
