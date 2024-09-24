@@ -20,23 +20,6 @@
 #include "spk.h"
 
 
-
-// Function to truncate a double value to a specific number of bits
-double truncate_double(double value, int precision) {
-    union {
-        double d;
-        uint64_t u;
-    } u;
-    u.d = value;
-
-    // Mask to keep only the desired precision bits
-    uint64_t mask = ~((1ULL << (52 - precision)) - 1);
-    u.u &= mask;
-
-    return u.d;
-}
-
-
 /*
  *  spk_free
  *
@@ -580,10 +563,6 @@ struct mpos_s assist_spk_target_pos(struct spk_s *pl, struct spk_target* target,
     double *val, z;
     struct mpos_s pos = {0};
 
-    char *var = getenv("ASSIST_TRUNCATE");
-    // convert to int, not just a pointer to int
-    int precision = var ? atoi(var) : 0;
-
     // find location of 'directory' describing the data records
     n = (int)((jde + rel - target->beg) / target->res);
     val = (double *)pl->map + target->two[n] - 1;
@@ -623,9 +602,6 @@ struct mpos_s assist_spk_target_pos(struct spk_s *pl, struct spk_target* target,
         // sum interpolation stuff
         for (p = 0; p < P; p++) {
             double coeff = val[b + p];
-            if (precision > 0) {
-                coeff = truncate_double(coeff, precision);
-            }
             pos.u[n] += coeff * T[p];
             pos.v[n] += coeff * S[p] * c;
             pos.w[n] += coeff * U[p] * c * c;
