@@ -22,7 +22,7 @@ try:
     ghash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii")
     ghash_arg = "-DASSISTGITHASH="+ghash
 except:
-    ghash_arg = "-DASSISTGITHASH=3e7f3888663b4527cb935d8331fb35dafc46ad70" #GITHASHAUTOUPDATE
+    ghash_arg = "-DASSISTGITHASH=bfe111a0aff21e8ab31345c0d3dfe343fb5d8f28" #GITHASHAUTOUPDATE
 
 class build_ext(_build_ext):
     def finalize_options(self):
@@ -89,7 +89,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='assist-adam-fork',
-    version='1.1.9a1',
+    version='1.1.9a2',
     description='A temporary fork of ASSIST: A library high accuracy ephemeris in REBOUND',
     long_description=long_description,
     long_description_content_type="text/markdown",
