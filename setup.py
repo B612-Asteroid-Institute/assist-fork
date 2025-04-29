@@ -89,7 +89,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='assist-adam-fork',
-    version='1.1.9a2',
+    version='1.1.9.post1',
     description='A temporary fork of ASSIST: A library high accuracy ephemeris in REBOUND',
     long_description=long_description,
     long_description_content_type="text/markdown",
